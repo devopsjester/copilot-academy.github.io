@@ -12,7 +12,7 @@ Focused, self-contained exercises you can complete in 15–30 minutes. Each lab 
 | Lab | Duration | Description |
 |-----|----------|-------------|
 | [Copilot CLI: Zero to Hero](/labs/copilot-cli-zero-to-hero) | ~1 hour | Learn GitHub Copilot CLI from first install to advanced agentic workflows |
-| [Copilot App: Zero to Hero](/labs/copilot-app-zero-to-hero) | ~2 hours | Master the GitHub Copilot app — parallel agent sessions, issue-to-PR lifecycle, canvases, orchestration, and automations |
+| [Copilot App: Zero to Hero](/labs/copilot-app-zero-to-hero) | ~2 hrs core / ~4-5 hrs full | Master the GitHub Copilot app — parallel agent sessions, issue-to-PR lifecycle, canvases, orchestration, and automations |
 | [Copilot SDK](/labs/copilot-sdk) | ~1 hour | Build a Smart Changelog Generator CLI using the Copilot SDK |
 
 ## Intermediate
