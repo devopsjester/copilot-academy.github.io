@@ -106,14 +106,21 @@ The app is installed and authenticated, and a **private** repo **initialized wit
 Six segments, thirty minutes. The demo doesn't *describe* parallel agents — it runs on them. You start a build in the first two minutes and never sit watching a progress bar, because there's always a second agent working while you talk.
 
 :::tip Facilitator prep
-The scaffold is built live, so there is no pre-built repo to prepare. What you do need: an **empty private repo** connected as a project, **dependencies pre-warmed** (run the scaffold once on the same machine beforehand so npm installs from cache), an **automation that has already run** so you have real output in Demo 6, and a **completed scaffold session kept around as a fallback** in case the live build stalls.
+The scaffold is built live, so there's no pre-built repo to prepare — but there *is* a prepared session, because a live build is the one thing in this demo that can run long.
 
-If the build finishes early, good — you have slack. If it's slow, keep talking; that's what Demos 2 and 3 are for.
+The day before, or an hour before:
+
+1. Connect an **empty private repo** (README only) as a project.
+2. **Run Demo 1's prompt end to end yourself**, in a session you `/rename` to `scaffold-prepared`. Let it finish green. **Do not merge it** — leave the PR unopened so `main` still holds only the README.
+3. Leave that session in the sidebar. It warms the npm cache for the live run *and* becomes your safety net in Demo 4.
+4. Create the **Daily repo triage** automation from Demo 6 and **run it once**, so you have real output to show instead of an empty history.
+
+That's it. Roughly fifteen minutes of prep for a thirty-minute demo.
 :::
 
 ## Demo 1 — Start the Build, Then Walk Away (~4 min)
 
-Open a new session on a **new working tree**, set mode to **Plan**, and give it the whole job at once:
+Open a new session on a **new working tree**, `/rename` it to `scaffold-live` so it's never confused with your prepared one, set mode to **Plan**, and give it the whole job at once:
 
 ```text
 Create a Node.js REST API project for a task manager in this repository.
@@ -198,7 +205,17 @@ Glance back at the sidebar: both sessions have been making progress this entire 
 
 ## Demo 4 — Collect Both Results (~6 min)
 
-Return to the scaffold session. It should be green. Verify it without leaving the app:
+Return to `scaffold-live`. It should be green.
+
+:::tip The prepared-earlier switch
+If it's still working, don't stall and don't narrate a progress bar. Click `scaffold-prepared` instead and carry on — same prompt, same repo, already finished. Say so plainly: *"I ran this exact prompt before we started, so we're not going to sit here watching npm install."* Nobody minds the cooking-show move; they mind watching a spinner.
+
+This is also worth doing **even when the live run finishes in time**, if you're running tight. Nothing later in the demo depends on which of the two sessions you merge.
+
+Leave `scaffold-live` running. Coming back at the end to find it green is a decent closing beat, and it makes the point that the session didn't need you.
+:::
+
+Verify without leaving the app:
 
 ```text
 /terminal npm test
