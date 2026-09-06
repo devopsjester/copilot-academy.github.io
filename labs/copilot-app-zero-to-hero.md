@@ -12,7 +12,7 @@ sidebar_position: 2
 
 The **GitHub Copilot app** is the agent-native desktop application for directing several AI agents at once. This lab covers it in two parts.
 
-**Part 1** is a 30-minute demo of what the app does that your IDE and terminal don't: parallel sessions on isolated worktrees, bidirectional canvases, agent-driven orchestration, and automations that run without you. You watch.
+**Part 1** is a 30-minute demo of what the app does that your IDE and terminal don't. It opens by handing an agent an entire API to build, then — instead of watching it work — starts a second agent building something else alongside it. The rest of the demo happens while both are running, which is the argument in miniature: bidirectional canvases, agents spawning their own agents, and automations that run with nobody in the room.
 
 **Part 2** is an hour at your own keyboard, building and shipping a **Task Manager REST API** — Plan mode to Autopilot, three agents at once, an issue taken to a merged pull request, all inside the app.
 
@@ -20,8 +20,8 @@ The **GitHub Copilot app** is the agent-native desktop application for directing
 Commands, panels, and availability change frequently. Type `/` in the prompt box to see what's available right now, or check the [official docs](https://docs.github.com/copilot/concepts/agents/github-copilot-app) if something looks different.
 :::
 
-:::tip Self-paced? Read Part 1 first, run it last
-Part 1 assumes a repository that already has code in it, which you build in Part 2. Read Part 1 for the map, work through Part 2, then come back and actually run the Part 1 exercises against your own scaffolded repo.
+:::tip Self-paced? Skim Part 1, then work Part 2
+Part 1 is self-contained — it builds its own scaffold, so you *can* run it end to end. But it moves fast on purpose, and Part 2 builds the same API more slowly with the reasoning spelled out. Skim Part 1 to see where you're going, then work Part 2 properly. If you do run Part 1 yourself, you'll have already covered Part 2's Exercise 2 and can skim it.
 :::
 
 ---
@@ -103,53 +103,67 @@ The app is installed and authenticated, and a **private** repo **initialized wit
 
 # Part 1 — The 30-Minute Demo
 
-Six segments, roughly five minutes each, ordered so each one raises a question the next one answers. In a facilitated session the CSA drives while the audience watches; nobody should be typing yet.
+Six segments, thirty minutes. The demo doesn't *describe* parallel agents — it runs on them. You start a build in the first two minutes and never sit watching a progress bar, because there's always a second agent working while you talk.
 
 :::tip Facilitator prep
-Have all of this ready **before** you start, because each takes minutes to produce live: a **scaffolded repo** with routes, tests, and a CI workflow already on `main`; a **prebuilt canvas** installed; a **PR with a failing check**; and an **automation** that has already run once so you have real output to show. Demo the finished artifact first, then show how it was asked for.
+The scaffold is built live, so there is no pre-built repo to prepare. What you do need: an **empty private repo** connected as a project, **dependencies pre-warmed** (run the scaffold once on the same machine beforehand so npm installs from cache), an **automation that has already run** so you have real output in Demo 6, and a **completed scaffold session kept around as a fallback** in case the live build stalls.
+
+If the build finishes early, good — you have slack. If it's slow, keep talking; that's what Demos 2 and 3 are for.
 :::
 
-## Demo 1 — The Control Center (~4 min)
+## Demo 1 — Start the Build, Then Walk Away (~4 min)
 
-Open **Sessions** with several sessions already running. This is the whole pitch in one screen: every session has its own branch, worktree, transcript, context window, model, and mode, and you switch between them by clicking.
-
-Point out **Chats** next to it. A chat creates no branch and no worktree — it's for "how should I model this?" rather than "build it." Starting a full session to ask a question is the most common new-user mistake.
-
-| Use | Reach for |
-|-----|-----------|
-| "How should I model this?" | **Chat** |
-| "Explain how this repo's auth works" | **Chat** |
-| "Implement the thing we agreed on" | **Session** |
-| "Pick up issue #42" | **Session** started from the issue |
-
-Then open **My work**: issues and PRs grouped into **All**, **Active**, **Review requests**, and **Done**, with CI status inline. Add a section filtered to `review-requested:@me is:open` to show it working as a triage dashboard.
-
-## Demo 2 — Three Agents at Once (~6 min)
-
-The headline feature. A single session is a queue: you ask, it works, you wait. Real work isn't a queue.
-
-Launch three sessions from **+**, each on a **new working tree**, and let them run simultaneously:
+Open a new session on a **new working tree**, set mode to **Plan**, and give it the whole job at once:
 
 ```text
-Add query-parameter filtering to GET /tasks: ?status, ?q for text search, and ?sort with ?order. Validate with Zod, return 400 on invalid values, and add tests.
+Create a Node.js REST API project for a task manager in this repository.
+
+- Express.js server, entry point src/index.js, port 3000
+- Zod for validation
+- src/routes/tasks.js with full CRUD: GET /tasks, GET /tasks/:id, POST /tasks, PUT /tasks/:id, DELETE /tasks/:id
+- src/middleware/errorHandler.js for centralized error handling with an AppError pattern
+- In-memory array as the data store, no database
+- A task has: id (uuid), title (string, 1-100 chars, required), description (optional, max 500), status (enum: todo | in-progress | done, defaults to todo), createdAt
+- Jest + supertest, with tests for happy paths and validation failures
+- A GitHub Actions workflow at .github/workflows/test.yml running npm ci and npm test on every pull request
+- package.json scripts: start, dev, test
+
+Plan the work. Do not execute yet.
 ```
+
+Read the plan out loud — this is the one place worth slowing down, because it's where a human still adds most of the value. Push back on it live so the audience sees the loop is a conversation, not a slot machine:
 
 ```text
-Add GET /tasks/stats returning total, byStatus, oldest, newest, and completionRate. Register this route BEFORE the existing GET /tasks/:id route, otherwise /tasks/:id will match "stats" as an id. Add tests including the empty-store case.
+Add request logging middleware and a GET /health endpoint returning status, uptime, and version. Update the plan.
 ```
+
+Approve, and switch it to **Autopilot**. It will now install dependencies, write tests, and run them until they pass — several minutes of work.
+
+**Then leave it.** That's the point of the next two segments. In an IDE you would be watching this. Here you're going to go do something else while it runs.
+
+## Demo 2 — Start a Second Agent While the First Works (~6 min)
+
+Open a **second** session, on its own working tree, and give it a completely different job — one that doesn't touch the code being scaffolded:
 
 ```text
-Generate a comprehensive README.md with every endpoint, request/response examples, and curl commands. Read the actual route files — don't invent endpoints.
+/create-canvas Create an agentic kanban board for this repository's tasks.
+
+People should be able to add a card with a title, description, and status; move cards between Todo, In Progress, and Done; and filter by status and text.
+
+The agent should be able to call get_board, add_card, move_card, and summarize_board.
+
+Persist the board state so it survives a restart. Scope it to the project.
 ```
 
-Click between them while they work. Set the docs session to a lighter model and the validation session to a higher-capability one — **per-session model selection is one of the quietest cost-saving features in the app.**
+Now click back and forth between the two sessions. **This is the moment the app justifies itself.** Two agents, two branches, two worktrees, two transcripts, two context windows — one repository, no collisions, and neither one is blocked on you.
 
-Two points worth making explicitly:
+Worth saying while they run:
 
+- Each session can use a **different model and reasoning effort**. Put the cheap one on scaffolding boilerplate and the expensive one on the work that needs judgment. Per-session model selection is one of the quietest cost-saving features in the app.
 - **The app isolates execution; Git still arbitrates integration.** Separate worktrees stop agents overwriting each other's files. They do *not* prevent merge conflicts.
-- Your attention becomes the scarce resource, not agent throughput.
+- Your attention is now the scarce resource, not agent throughput.
 
-Now the runtime dropdown, which is where customers get confused:
+Then the runtime dropdown, which is where customers get confused:
 
 | Runtime | Executes on | Survives machine sleep? |
 |---------|------------|------------------------|
@@ -165,27 +179,50 @@ Now the runtime dropdown, which is where customers get confused:
 Only the first two keep running when your machine is off.
 :::
 
-## Demo 3 — Canvases (~6 min)
+## Demo 3 — Tour the Control Center While They Run (~4 min)
 
-If parallel sessions are the app's most *useful* feature, canvases are its most *distinctive*. Nothing else in the Copilot family has this.
+Both agents are still working. Use the time.
 
-Chat is good for defining intent, but most real work happens in a **work surface**: a terminal, a document, a board. A canvas is that surface in the side panel, and it's **bidirectional** — the agent updates it while working, you edit it directly, and the agent continues *from your edits*.
+**Sessions** is the parallel-work control center — sessions grouped by project, switched by clicking. **Chats** sits next to it and creates no branch and no worktree. Starting a full session to ask a question is the most common new-user mistake:
 
-Start with the cheap version to make the idea land in seconds:
+| Use | Reach for |
+|-----|-----------|
+| "How should I model this?" | **Chat** |
+| "Explain how this repo's auth works" | **Chat** |
+| "Implement the thing we agreed on" | **Session** |
+| "Pick up issue #42" | **Session** started from the issue |
+
+**My work** groups your issues and PRs into **All**, **Active**, **Review requests**, and **Done**, with CI status inline. Add a section filtered to `review-requested:@me is:open` to show it working as a triage dashboard.
+
+Glance back at the sidebar: both sessions have been making progress this entire segment.
+
+## Demo 4 — Collect Both Results (~6 min)
+
+Return to the scaffold session. It should be green. Verify it without leaving the app:
 
 ```text
 /terminal npm test
 ```
 
-That's a canvas, not a shell-out. Then open your prebuilt kanban canvas and drive it **both ways**. Add a card through the UI yourself, then ask the agent:
+That terminal is a **canvas** in the side panel, not a shell-out — which is the perfect setup for the other session's output. Merge the scaffold so later segments have code to work with:
+
+```text
+/pr-open
+```
+
+```text
+/pr-merge
+```
+
+Now open the kanban canvas the second agent built. Chat is good for defining intent, but most real work happens in a **work surface**: a terminal, a document, a board. A canvas is that surface, and it's **bidirectional**.
+
+Add a card through the UI yourself. Then ask the agent:
 
 ```text
 Read the board and add a card for every open issue in this repository, in the Todo column. Then summarize what's in flight and what I should pick up next.
 ```
 
-You never described the board to the agent, and it never described the board back to you. You're both manipulating the same state.
-
-Finally, show where it came from — `/create-canvas` generates the extension from a prompt — and where it lives:
+You never described the board to the agent, and it never described the board back to you. You're both manipulating the same state. Nothing else in the Copilot family has this.
 
 | Scope | Location | Use for |
 |-------|----------|---------|
@@ -194,15 +231,15 @@ Finally, show where it came from — `/create-canvas` generates the extension fr
 
 A project-scoped canvas is committed, so **the whole team gets it on their next pull**.
 
-## Demo 4 — Agents Managing Agents (~5 min)
+## Demo 5 — Agents Managing Agents (~5 min)
 
-Demo 2 ran sessions in parallel by hand. Orchestration lets an agent do it for you:
+You just ran two sessions in parallel by hand. Orchestration lets an agent do it for you — and now that the scaffold is on `main`, there's real code to work on:
 
 ```text
 /orchestrate Split the remaining work into independent workstreams and run them in parallel child sessions: pagination on GET /tasks, and rate-limiting middleware. Each should end with a pull request. Report back with the PR links.
 ```
 
-Child sessions appear **nested under their creator** in the sidebar.
+Child sessions appear **nested under their creator** in the sidebar. Let them run in the background — same trick as Demo 1.
 
 Then `/fork`, which has no real equivalent in IDE chat:
 
@@ -222,11 +259,11 @@ Git branches files. `/fork` branches files **and** the agent's accumulated conve
 
 Each of these creates sessions and consumes AI credits — worth saying out loud to an enterprise audience.
 
-## Demo 5 — Automations (~5 min)
+## Demo 6 — Automations and Governance (~5 min)
 
-Sessions require you. **Automations don't.** This is where the app stops being a tool you use and becomes infrastructure that runs.
+Every session so far needed you in the room. **Automations don't.** This is where the app stops being a tool you use and becomes infrastructure that runs.
 
-Show a **Daily repo triage** automation that has already run, then walk the definition: **Automations → New automation**, a `Daily` trigger, **Run in the cloud** enabled, and a **Tools** allow-list.
+Show the **Daily repo triage** automation you ran before the session, then walk its definition: **Automations → New automation**, a `Daily` trigger, **Run in the cloud** enabled, and a **Tools** allow-list.
 
 ```text
 Triage this repository and report: new issues in the last 24 hours with suggested labels; open PRs that are blocked by failing checks, conflicts, or no review after 48 hours; anything stale for 14+ days; and one recommended priority for today. Under 300 words, lead with anything needing a decision from me.
@@ -246,14 +283,10 @@ The facts that matter to an enterprise buyer, more than a second sample automati
 | **Attribution** | PRs are attributed to the creator, who therefore **cannot approve them** |
 | **Not versioned** | Definitions live outside your repo — **not in Git**, not code-reviewed, not revertible |
 
-## Demo 6 — Governance and Reach (~4 min)
-
-Close on the questions an admin in the room is already forming.
-
-**Remote control.** `/remote` lets you monitor and steer a session from GitHub.com or GitHub Mobile.
+Close on the questions the admin in the room is already forming.
 
 :::warning Remote control does not mean "runs in the cloud"
-The most commonly misunderstood feature in the app:
+`/remote` lets you steer a session from GitHub.com or GitHub Mobile, and it is the most commonly misunderstood feature in the app:
 
 - **The session still runs on your machine.** Every command executes locally.
 - **Your machine must stay online.** If it sleeps, remote control is unavailable until it's back.
@@ -263,29 +296,21 @@ The most commonly misunderstood feature in the app:
 If you need work that survives a closed laptop, you want a cloud sandbox or a cloud automation.
 :::
 
-**Enterprise managed settings** control which actions users may take, including which plugins they can install and whether auto-approval (`/yolo`) is permitted. Three deployment paths:
+**Enterprise managed settings** control which actions users may take, including which plugins they can install and whether auto-approval (`/yolo`) is permitted, deployed server-managed via `.github-private/copilot/managed-settings.json`, file-based (macOS `/Library/Application Support/GitHubCopilot/`, Windows `%ProgramFiles%\GitHubCopilot\`, Linux `/etc/github-copilot/`), or through MDM. A separate `remoteControl` setting applies per device.
 
-| Method | Where |
-|--------|-------|
-| Server-managed | `.github-private/copilot/managed-settings.json` |
-| File-based | macOS `/Library/Application Support/GitHubCopilot/` · Windows `%ProgramFiles%\GitHubCopilot\` · Linux `/etc/github-copilot/` |
-| MDM-managed | Native policy values, not a deployed JSON file |
-
-A separate `remoteControl` managed setting applies per device, on top of the org policy above.
-
-**Deep links** embed the app into runbooks and ticketing systems using the `ghapp://` scheme — for example `ghapp://github.com/OWNER/REPO/issues/NUMBER` or `ghapp://session/new?repo=OWNER%2FREPO&mode=plan&prompt=...`. They open a confirmation UI rather than silently creating sessions.
+**Deep links** embed the app into runbooks and ticketing systems using the `ghapp://` scheme — for example `ghapp://session/new?repo=OWNER%2FREPO&mode=plan&prompt=...`. They open a confirmation UI rather than silently creating sessions.
 
 **Bring your own model** (public preview) under **Settings → Model providers** supports OpenAI, Azure OpenAI, Anthropic, Ollama, LM Studio, and any OpenAI-compatible endpoint, with credentials in the system credential store.
 
 ### ✅ Demo Checkpoint
 
-The audience has seen parallel sessions, a bidirectional canvas, agent-managed agents, an automation running without a human, and the governance surface. Now hand them the keyboard.
+In thirty minutes the audience watched an API get built, a canvas get built *at the same time*, both land, agents spawn their own agents, and an automation run with nobody in the room. Now hand them the keyboard.
 
 ---
 
 # Part 2 — One Hour, Hands On
 
-Six exercises, about an hour total. You'll rebuild the foundation the demo stood on: scaffold an API, run three agents on it at once, take an issue to a merged pull request.
+Six exercises, about an hour total. The demo moved fast and skipped the reasoning; here you build the same API yourself, slowly enough to see why each step is shaped the way it is — scaffold with Plan mode, run three agents on it at once, and take an issue to a merged pull request.
 
 Complete [Setup](#setup) first.
 
