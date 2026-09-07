@@ -604,7 +604,7 @@ Go to **Customize → Canvas**, browse the featured list, then click **Installed
 
 ### 7.3 Create Your Own
 
-In an active session:
+Slash commands only exist in sessions, not Chats. Open a session on this repo — a **second** one, separate from `scaffold`, so this can build while that does:
 
 ```text
 /create-canvas Create an agentic kanban board for this repository's tasks.
